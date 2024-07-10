@@ -32,13 +32,24 @@ func main() {
 	_, err = connection.Read(buffer)
 	print(string(buffer[:]))
 
-	if !strings.HasPrefix(string(buffer[:]), "GET / HTTP/1.1") {
-		// 404 Response, Request not found
-		response := "HTTP/1.1 404 Not Found\r\n\r\n"
+	if strings.HasPrefix(string(buffer[:]), "GET /echo/") {
+		// Initialisation
+		content := string(buffer[:])
+		content = strings.Split(strings.TrimPrefix(content, "GET /echo/"), " ")[0]
+		contentLength := string(rune(len(content)))
+
+		// Generate Response
+		response := "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + contentLength + "\r\n\r\n" + content
+
+		// Send Response
 		_, err = connection.Write([]byte(response))
-	} else {
+	} else if strings.HasPrefix(string(buffer[:]), "GET / HTTP/1.1") {
 		// 200 Response, Request found / valid
 		response := "HTTP/1.1 200 OK\r\n\r\n"
+		_, err = connection.Write([]byte(response))
+	} else {
+		// 404 Response, Request not found
+		response := "HTTP/1.1 404 Not Found\r\n\r\n"
 		_, err = connection.Write([]byte(response))
 	}
 
