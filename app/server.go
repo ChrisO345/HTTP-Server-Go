@@ -23,9 +23,13 @@ func main() {
 	}
 
 	// Accepts a connection
-	_, err = l.Accept()
+	connection, err := l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
+
+	// Response to send: HTTP/1.1 200 OK\r\n\r\n
+	response := "HTTP/1.1 200 OK\r\n\r\n"
+	_, err = connection.Write([]byte(response))
 }
