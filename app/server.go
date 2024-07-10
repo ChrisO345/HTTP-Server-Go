@@ -36,11 +36,11 @@ func main() {
 		// Initialisation
 		content := string(buffer[:])
 		content = strings.Split(strings.TrimPrefix(content, "GET /echo/"), " ")[0]
-		contentLength := string(rune(len(content)))
+		contentLength := fmt.Sprintf("%d", len(content))
 
 		// Generate Response
 		response := "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + contentLength + "\r\n\r\n" + content
-
+		print(response)
 		// Send Response
 		_, err = connection.Write([]byte(response))
 	} else if strings.HasPrefix(string(buffer[:]), "GET / HTTP/1.1") {
