@@ -73,7 +73,7 @@ func handleConnection(conn net.Conn) {
 		fileName := params[2]
 		print(fileName)
 		if method == "POST" {
-			data := content
+			data := params[len(params)]
 			_ = os.WriteFile(dir+fileName, []byte(data), 0644)
 			response = "HTTP/1.1 201 Created\r\n\r\n"
 		} else {
