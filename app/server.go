@@ -30,11 +30,14 @@ func main() {
 	// Reads the request into a buffer
 	buffer := make([]byte, 1024)
 	_, err = connection.Read(buffer)
-	print(string(buffer[:]))
 
-	if strings.HasPrefix(string(buffer[:]), "GET /echo/") {
+	content := string(buffer[:])
+	endpoint := getEndpoint(content)
+	print(content + "\n")
+	headers := strings.Split(endpoint, "/")
+
+	if headers[0] == "echo" {
 		// Initialisation
-		content := string(buffer[:])
 		content = strings.Split(strings.TrimPrefix(content, "GET /echo/"), " ")[0]
 		contentLength := fmt.Sprintf("%d", len(content))
 
@@ -43,7 +46,17 @@ func main() {
 		print(response)
 		// Send Response
 		_, err = connection.Write([]byte(response))
-	} else if strings.HasPrefix(string(buffer[:]), "GET / HTTP/1.1") {
+	} else if headers[0] == "user-agent" {
+		// Initialisation
+		userAgent := strings.Split(strings.ToLower(content), "user-agent: ")[1]
+		userAgent = strings.Split(userAgent, "\r\n")[0]
+		print(userAgent + "\n")
+		agentLength := fmt.Sprintf("%d", len(userAgent))
+
+		// Generate Response
+		response := "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + agentLength + "\r\n\r\n" + userAgent
+		_, err = connection.Write([]byte(response))
+	} else if len(headers) == 0 {
 		// 200 Response, Request found / valid
 		response := "HTTP/1.1 200 OK\r\n\r\n"
 		_, err = connection.Write([]byte(response))
@@ -53,4 +66,8 @@ func main() {
 		_, err = connection.Write([]byte(response))
 	}
 
+}
+
+func getEndpoint(content string) string {
+	return strings.Split(strings.TrimPrefix(content, "GET /"), " ")[0]
 }
