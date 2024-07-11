@@ -49,6 +49,7 @@ func handleConnection(conn net.Conn) {
 
 	params := getParams(content)
 
+	method := params[0]
 	path := "/" + params[1]
 
 	response := ""
@@ -71,11 +72,17 @@ func handleConnection(conn net.Conn) {
 		dir := os.Args[2]
 		fileName := params[2]
 		print(fileName)
-		data, err := os.ReadFile(dir + fileName)
-		if err != nil {
-			response = "HTTP/1.1 404 Not Found\r\n\r\n"
+		if method == "POST" {
+			data := content
+			_ = os.WriteFile(dir+fileName, []byte(data), 0644)
+			response = "HTTP/1.1 201 Created\r\n\r\n"
 		} else {
-			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)
+			data, err := os.ReadFile(dir + fileName)
+			if err != nil {
+				response = "HTTP/1.1 404 Not Found\r\n\r\n"
+			} else {
+				response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)
+			}
 		}
 	default:
 		response = "HTTP/1.1 404 Not Found\r\n\r\n"
