@@ -100,7 +100,7 @@ func handleConnection(conn net.Conn) {
 			data, err := os.ReadFile(dir + fileName)
 			print("Debugging Data from GET")
 			print("\n")
-			print(data)
+			print(string(data[:]))
 			print("\n")
 			if err != nil {
 				response = "HTTP/1.1 404 Not Found\r\n\r\n"
