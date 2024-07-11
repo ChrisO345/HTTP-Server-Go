@@ -35,6 +35,8 @@ func main() {
 	endpoint := getEndpoint(content)
 	print(content + "\n")
 	headers := strings.Split(endpoint, "/")
+	print(headers[0] + "\n")
+	print(len(headers))
 
 	if headers[0] == "echo" {
 		// Initialisation
@@ -56,7 +58,7 @@ func main() {
 		// Generate Response
 		response := "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + agentLength + "\r\n\r\n" + userAgent
 		_, err = connection.Write([]byte(response))
-	} else if len(headers) == 0 {
+	} else if headers[0] == "" {
 		// 200 Response, Request found / valid
 		response := "HTTP/1.1 200 OK\r\n\r\n"
 		_, err = connection.Write([]byte(response))
