@@ -40,7 +40,7 @@ func main() {
 }
 
 func getParams(content string) []string {
-	return strings.Split(strings.Split(content, " ")[1], "/")
+	return strings.Split(strings.Split(content, " ")[1], "/")[1:]
 }
 
 func handleConnection(conn net.Conn) {
@@ -79,10 +79,14 @@ func handleConnection(conn net.Conn) {
 		case "/echo":
 			_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(params[2])) + "\r\n\r\n" + params[2]))
 		case "/user-agent":
-			userAgent := strings.Split(strings.ToLower(content), "user-agent: ")[1]
-			userAgent = strings.Split(userAgent, "\r\n")[0]
-			agentLength := fmt.Sprintf("%d", len(userAgent))
-			_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + agentLength + "\r\n\r\n" + userAgent))
+			requestFields := strings.Split(content, "\r\n")
+			for _, field := range requestFields {
+				if strings.Contains(field, "User-Agent") {
+					fieldValue := strings.Split(field, ": ")
+					_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(fieldValue[1])) + "\r\n\r\n" + fieldValue[1] + "\r\n"))
+					break
+				}
+			}
 		default:
 			_, err = conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		}
