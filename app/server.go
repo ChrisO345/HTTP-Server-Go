@@ -86,14 +86,15 @@ func handleConnection(conn net.Conn) {
 		print(fileName)
 		print("\n")
 		if method == "POST" {
-			data := strings.Split(content, "\r\n")
+			dataList := strings.Split(content, "\r\n")
+			data := dataList[len(dataList)-1]
 			print("Debugging Data from POST")
 			print("\n")
 			for _, d := range data {
 				print(d)
 				print("\n")
 			}
-			err = writeToFile(dir+fileName, data[0])
+			err = writeToFile(dir+fileName, data)
 			response = "HTTP/1.1 201 Created\r\n\r\n"
 		} else {
 			data, err := os.ReadFile(dir + fileName)
