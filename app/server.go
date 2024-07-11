@@ -71,6 +71,8 @@ func handleConnection(conn net.Conn) {
 				break
 			}
 		}
+	case "/files":
+		//file := params[2]
 	default:
 		_, err = conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
