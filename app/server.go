@@ -19,13 +19,7 @@ func main() {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
-	defer func(l net.Listener) {
-		err := l.Close()
-		if err != nil {
-			fmt.Println("Error closing listener: ", err.Error())
-			os.Exit(1)
-		}
-	}(l)
+	defer l.Close()
 
 	for {
 		// Accepts a connection
@@ -40,60 +34,49 @@ func main() {
 }
 
 func getParams(content string) []string {
-	return strings.Split(strings.Split(content, " ")[1], "/")[1:]
+	return strings.Split(strings.Split(content, " ")[1], "/")
 }
 
 func handleConnection(conn net.Conn) {
-	defer func(conn net.Conn) {
-		err := conn.Close()
-		if err != nil {
-			fmt.Println("Error closing connection: ", err.Error())
-			os.Exit(1)
-		}
-	}(conn)
+	defer conn.Close()
 
-	for {
-		// Reads the request into a buffer
-		buffer := make([]byte, 1024)
-		length, err := conn.Read(buffer)
-		if err != nil {
-			fmt.Println("Error reading: ", err.Error())
-			os.Exit(1)
-		}
+	// Reads the request into a buffer
+	buffer := make([]byte, 1024)
+	length, err := conn.Read(buffer)
+	if err != nil {
+		fmt.Println("Error reading: ", err.Error())
+		os.Exit(1)
+	}
 
-		content := string(buffer[:length])
+	content := string(buffer[:length])
 
-		params := getParams(content)
+	params := getParams(content)
 
-		path := "/" + params[0]
+	path := "/" + params[1]
 
-		print(content + "\n")
-		for param := range params {
-			print(params[param] + "\n")
-		}
-		print(path + "\n")
+	print(content + "\n")
+	print(path + "\n")
 
-		switch path {
-		case "/":
-			_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
-		case "/echo":
-			_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(params[2])) + "\r\n\r\n" + params[2]))
-		case "/user-agent":
-			requestFields := strings.Split(content, "\r\n")
-			for _, field := range requestFields {
-				if strings.Contains(field, "User-Agent") {
-					fieldValue := strings.Split(field, ": ")
-					_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(fieldValue[1])) + "\r\n\r\n" + fieldValue[1] + "\r\n"))
-					break
-				}
+	switch path {
+	case "/":
+		_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	case "/echo":
+		_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(params[2])) + "\r\n\r\n" + params[2]))
+	case "/user-agent":
+		requestFields := strings.Split(content, "\r\n")
+		for _, field := range requestFields {
+			if strings.Contains(field, "User-Agent") {
+				fieldValue := strings.Split(field, ": ")
+				_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(fieldValue[1])) + "\r\n\r\n" + fieldValue[1] + "\r\n"))
+				break
 			}
-		default:
-			_, err = conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		}
+	default:
+		_, err = conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	}
 
-		if err != nil {
-			fmt.Println("Error writing: ", err.Error())
-			os.Exit(1)
-		}
+	if err != nil {
+		fmt.Println("Error writing: ", err.Error())
+		os.Exit(1)
 	}
 }
