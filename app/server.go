@@ -44,8 +44,14 @@ func handleConnection(conn net.Conn) {
 	}
 
 	content := string(buffer[:length])
+	print("Debugging Content")
+	print("\n")
 	print(content)
+	print("\n")
+	print("Debugging Args")
+	print("\n")
 	print(os.Args)
+	print("\n")
 
 	params := getParams(content)
 
@@ -75,13 +81,17 @@ func handleConnection(conn net.Conn) {
 		if method == "POST" {
 			data := params[len(params)-1]
 			print("Debugging Data from POST")
+			print("\n")
 			print(data)
+			print("\n")
 			err = writeToFile(dir+fileName, data)
 			response = "HTTP/1.1 201 Created\r\n\r\n"
 		} else {
 			data, err := os.ReadFile(dir + fileName)
 			print("Debugging Data from GET")
+			print("\n")
 			print(data)
+			print("\n")
 			if err != nil {
 				response = "HTTP/1.1 404 Not Found\r\n\r\n"
 			}
