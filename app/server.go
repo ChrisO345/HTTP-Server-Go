@@ -8,11 +8,6 @@ import (
 )
 
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	fmt.Println("Logs from your program will appear here!")
-
-	// Uncomment this block to pass the first stage
-
 	// Binds to port 4221
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
@@ -49,33 +44,44 @@ func handleConnection(conn net.Conn) {
 	}
 
 	content := string(buffer[:length])
+	print(content)
+	print(os.Args)
 
 	params := getParams(content)
 
 	path := "/" + params[1]
 
-	print(content + "\n")
-	print(path + "\n")
+	response := ""
 
 	switch path {
 	case "/":
-		_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+		response = "HTTP/1.1 200 OK\r\n\r\n"
 	case "/echo":
-		_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(params[2])) + "\r\n\r\n" + params[2]))
+		response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(params[2])) + "\r\n\r\n" + params[2]
 	case "/user-agent":
 		requestFields := strings.Split(content, "\r\n")
 		for _, field := range requestFields {
 			if strings.Contains(field, "User-Agent") {
 				fieldValue := strings.Split(field, ": ")
-				_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(fieldValue[1])) + "\r\n\r\n" + fieldValue[1] + "\r\n"))
+				response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(fieldValue[1])) + "\r\n\r\n" + fieldValue[1] + "\r\n"
 				break
 			}
 		}
 	case "/files":
-		//file := params[2]
+		dir := os.Args[2]
+		fileName := params[2]
+		print(fileName)
+		data, err := os.ReadFile(dir + fileName)
+		if err != nil {
+			response = "HTTP/1.1 404 Not Found\r\n\r\n"
+		} else {
+			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)
+		}
 	default:
-		_, err = conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		response = "HTTP/1.1 404 Not Found\r\n\r\n"
 	}
+
+	_, err = conn.Write([]byte(response))
 
 	if err != nil {
 		fmt.Println("Error writing: ", err.Error())
