@@ -49,7 +49,7 @@ func handleConnection(conn net.Conn) {
 
 	params := getParams(content)
 
-	method := params[0]
+	method := strings.Split(content, " ")[0]
 	path := "/" + params[1]
 
 	response := ""
