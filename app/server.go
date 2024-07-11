@@ -54,6 +54,10 @@ func handleConnection(conn net.Conn) {
 	print("\n")
 
 	params := getParams(content)
+	print("Debugging Params")
+	print("\n")
+	print(params)
+	print("\n")
 
 	method := strings.Split(content, " ")[0]
 	path := "/" + params[1]
