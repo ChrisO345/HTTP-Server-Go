@@ -40,7 +40,7 @@ func main() {
 }
 
 func getParams(content string) []string {
-	return strings.Split(strings.TrimPrefix(content, "GET /"), "/")
+	return strings.Split(strings.Split(content, " ")[1], "/")
 }
 
 func handleConnection(conn net.Conn) {
@@ -66,6 +66,12 @@ func handleConnection(conn net.Conn) {
 		params := getParams(content)
 
 		path := "/" + params[0]
+
+		print(content + "\n")
+		for param := range params {
+			print(params[param] + "\n")
+		}
+		print(path + "\n")
 
 		switch path {
 		case "/":
