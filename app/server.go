@@ -56,8 +56,10 @@ func handleConnection(conn net.Conn) {
 	params := getParams(content)
 	print("Debugging Params")
 	print("\n")
-	print(params)
-	print("\n")
+	for _, param := range params {
+		print(param)
+		print("\n")
+	}
 
 	method := strings.Split(content, " ")[0]
 	path := "/" + params[1]
@@ -82,6 +84,7 @@ func handleConnection(conn net.Conn) {
 		dir := os.Args[2]
 		fileName := params[2]
 		print(fileName)
+		print("\n")
 		if method == "POST" {
 			data := params[len(params)-1]
 			print("Debugging Data from POST")
