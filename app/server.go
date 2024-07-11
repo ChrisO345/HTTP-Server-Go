@@ -74,11 +74,14 @@ func handleConnection(conn net.Conn) {
 		print(fileName)
 		if method == "POST" {
 			data := params[len(params)-1]
+			print("Debugging Data from POST")
 			print(data)
 			err = writeToFile(dir+fileName, data)
 			response = "HTTP/1.1 201 Created\r\n\r\n"
 		} else {
 			data, err := os.ReadFile(dir + fileName)
+			print("Debugging Data from GET")
+			print(data)
 			if err != nil {
 				response = "HTTP/1.1 404 Not Found\r\n\r\n"
 			}
