@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	print("Ready to serve\n")
+
 	// Binds to port 4221
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
@@ -52,6 +54,11 @@ func handleConnection(conn net.Conn) {
 
 	response := ""
 
+	for _, arg := range os.Args {
+		print(arg)
+		print("\n")
+	}
+
 	switch path {
 	case "/":
 		response = "HTTP/1.1 200 OK\r\n\r\n"
@@ -67,7 +74,7 @@ func handleConnection(conn net.Conn) {
 			}
 		}
 	case "/files":
-		dir := os.Args[2]
+		dir := os.Args[len(os.Args)-1]
 		fileName := params[2]
 		print(fileName)
 		print("\n")
